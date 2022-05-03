@@ -45,6 +45,8 @@ class Player:
         
         x = action[1]
         y = action[2]
+        
+        # captures and placement 
         self.board[(x,y)] = player
         
         game = GameFile.Game(5)
