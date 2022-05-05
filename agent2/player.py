@@ -6,6 +6,7 @@ class Player:
     
     # local game state
     board = {}
+    size = 0
     
     def __init__(self, player, n):
         """
@@ -17,6 +18,7 @@ class Player:
         as Blue.
         """
         self.board = self.create_dict(n)
+        self.size = n
         
         # put your code here
 
@@ -25,8 +27,23 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
+        x = randint(0,4)
+        y = randint(0,4)
         
-        return (GameFile._ACTION_PLACE, randint(0,4), randint(0,4))
+        # you cant place in the center
+        center = round( (self.size / 2) )
+        
+        while(True):
+            if(self.board[(x,y)] == None):
+                
+                if (x,y) != (center, center):
+                    
+                    return (GameFile._ACTION_PLACE, x,y)
+                
+            else:
+                x = randint(0,4)
+                y = randint(0,4)
+
 
         # put your code here
     
@@ -73,5 +90,5 @@ class Player:
         mydict = {}
         for i in range(n):
             for j in range(n):
-                mydict[(i,j)] = None
+                mydict[(i,j)] = None    
         return mydict
