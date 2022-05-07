@@ -1,8 +1,20 @@
 from random import randint
-import referee.board as Board
+from agent1.board import Board
 import referee.game as GameFile
+import agent1.constant as const
 
 class Player:
+    """
+    The coordinates in board follow the format (y,x)
+    
+    For every action done by a player 
+        - Two turn functions are called
+            - one for agent 1
+            - other for agent 2
+        - These functions are called for the sole purpose of updating the local board we have 
+        and for the referee to update the global board
+    
+    """
     
     def __init__(self, player, n):
         """
@@ -15,35 +27,40 @@ class Player:
         """
         self.board = Board(n)
         self.size = n
+        self.player = player
+        self.turn_counter = 1
         
-        # put your code here
-
+        # getting the final set of coordinates for future reference
+        if (player == "red"):
+            final_coords1 = self.return_red_coords1()
+            final_coords2 = self.return_red_coords2()
+        else:
+            final_coords1 = self.return_blue_coords1()
+            final_coords2 = self.return_blue_coords2()
+            
     def action(self):
         """
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
-        
-        the return type is (The action that happened , x , y)
         """
-        x = randint(0,4)
-        y = randint(0,4)
         
-        # you cant place in the center
-        center = round( (self.size / 2) )
+        print ("hi we are in agent 1 : action function")
+        center = round((self.size / 2))
         
-        while(True):
-            if(self.board[(x,y)] == None):
-                
-                if (x,y) != (center, center):
-                    
-                    return (GameFile._ACTION_PLACE, x,y)
-                
-            else:
-                x = randint(0,4)
-                y = randint(0,4)
-
-
-        # put your code here
+        # Since we cant place the first piece in the middle we will place it a bit off a corner
+        # that way it cant be completely blocked, and form a path
+        # the below link was used to decide the opening strategy
+        # http://www.trmph.com/hexwiki/Basic_strategy_guide.html
+        if ((self.turn_counter == 1) and (self.player == const.RED)):
+            return (GameFile._ACTION_PLACE, 0, 1)
+        
+        # if it is blue we will place it in the center everytime to get control of the board
+        if ((self.turn_counter == 1) and (self.player == const.BLUE)): 
+            return (GameFile._ACTION_PLACE, center, center)
+        
+        
+        
+        
     
     def turn(self, player, action):
         """
@@ -55,15 +72,84 @@ class Player:
         Note: At the end of your player's turn, the action parameter is
         the same as what your player returned from the action method
         above. However, the referee has validated it at this point.
+        
+        Turn doesnt affect any action, the whole purpose of turn is to 
+        just update the local board in player
         """
-        print("hi we are in agent 2")
         
-        x = action[1]
-        y = action[2]
+        print("hi we are in agent 1 : turn function")
+        print (f"The turn counter value for {player} is {self.turn_counter}")
         
-        # captures and placement 
-        self.board[(x,y)] = player
         
-        game = GameFile.Game(5)
-        print(self.board)
-        # put your code here
+        # if its a place action then you just place the point on the board
+        if (action[0] == GameFile._ACTION_PLACE):
+            y = action[1]
+            x = action[2]
+            self.board.place(player, (y,x))
+        
+        # if it is a steal action then you also check whether its the second turn
+        # as this is the only turn where a steal can possibly happen
+        # if they are both true then  do steal
+        elif (action[0] == GameFile._ACTION_STEAL):
+            if (self.turn_counter == const.ALLOWED_TO_STEAL_TURN):
+                self.board.swap()
+        
+        
+        for i in range(self.size):
+            for j in range(self.size):
+                print(f"({i},{j}) = {self.board.__getitem__((i,j))}")
+
+        # The position of this would be an error
+        self.turn_counter += 1
+
+    def return_red_coords1(self):
+        """
+        return the bottom row of coordinates in a list of tuples
+        """
+        
+        size = self.size
+        array = []
+        
+        for i in range(size):   
+            array.append((0,i))
+        
+        return array
+    
+    def return_red_coords2(self):
+        """
+        return the top row coordinates in a list of tuples
+        """
+        
+        size = self.size
+        array = []
+        
+        for i in range(size):   
+            array.append((size,i))
+        
+        return array
+
+    def return_blue_coords1(self):
+        """
+        return the bottom row of coordinates in a list of tuples
+        """
+        
+        size = self.size
+        array = []
+        
+        for i in range(size):   
+            array.append((i,0))
+        
+        return array
+    
+    def return_blue_coords2(self):
+        """
+        return the top row coordinates in a list of tuples
+        """
+        
+        size = self.size
+        array = []
+        
+        for i in range(size):   
+            array.append((i,size))
+        
+        return array

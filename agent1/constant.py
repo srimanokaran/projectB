@@ -1,0 +1,3 @@
+RED = "red"
+BLUE = "blue"
+ALLOWED_TO_STEAL_TURN = 2

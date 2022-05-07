@@ -1,12 +1,9 @@
 from random import randint
-import referee.board as BoardFile
+from agent2.board import Board
 import referee.game as GameFile
 
 class Player:
     
-    # local game state
-    board = {}
-    size = 0
     
     def __init__(self, player, n):
         """
@@ -17,7 +14,7 @@ class Player:
         play as Red, or the string "blue" if your player will play
         as Blue.
         """
-        self.board = self.create_dict(n)
+        self.board = Board(n)
         self.size = n
         
         # put your code here
@@ -27,25 +24,18 @@ class Player:
         Called at the beginning of your turn. Based on the current state
         of the game, select an action to play.
         """
-        x = randint(0,4)
-        y = randint(0,4)
+        print("hi we are in agent 2 : action function")
         
-        # you cant place in the center
-        center = round( (self.size / 2) )
+        x = randint(0,self.size-1)
+        y = randint(0,self.size-1)
         
         while(True):
-            if(self.board[(x,y)] == None):
-                
-                if (x,y) != (center, center):
-                    
-                    return (GameFile._ACTION_PLACE, x,y)
-                
+            if(self.board[x,y] == None):
+                return (GameFile._ACTION_PLACE, x,y)
             else:
-                x = randint(0,4)
-                y = randint(0,4)
+                x = randint(0,self.size-1)
+                y = randint(0,self.size-1)
 
-
-        # put your code here
     
     def turn(self, player, action):
         """
@@ -58,37 +48,38 @@ class Player:
         the same as what your player returned from the action method
         above. However, the referee has validated it at this point.
         """
-        print("hi we are in agent 2")
+        print("hi we are in agent 2 : turn function")
         
         x = action[1]
         y = action[2]
-        
-        # captures and placement 
         self.board[(x,y)] = player
         
-        game = GameFile.Game(5)
-        print(self.board)
-        # put your code here
-
-    def create_dict(self, n):
+        for i in range(self.size):
+            for j in range(self.size):
+                print(f"({i},{j}) = {self.board.__getitem__((i,j))}")
+    
+    def return_blue_coords1(self):
         """
-        create a dictionary with coordinates of an n x n matrix as the keys and none as
-        the value to initialise
+        return the bottom row of coordinates in a list of tuples
+        """
         
-        in the future the value could be either red, blue, blocked
-        red : a piece placed by red
-        blue : a piece placed by blue
-        blocked : a coordinate that is blocked by design
-
-        Args:
-            n (int): size of the board
-
-        Returns:
-            dict: a dictionary with coordinates with keys as coordinates of a n x n matrix
-            and value as None initially
+        size = self.size
+        array = []
+        
+        for i in range(size):   
+            array.append((i,0))
+        
+        return array
+    
+    def return_blue_coords2(self):
         """
-        mydict = {}
-        for i in range(n):
-            for j in range(n):
-                mydict[(i,j)] = None    
-        return mydict
+        return the top row coordinates in a list of tuples
+        """
+        
+        size = self.size
+        array = []
+        
+        for i in range(size):   
+            array.append((i,size))
+        
+        return array
