@@ -29,6 +29,7 @@ class Player:
         self.size = n
         self.player = player
         self.turn_counter = 1
+        self.last_move = (0,0) # this is just a temp move
         
         # getting the final set of coordinates for future reference
         if (player == "red"):
@@ -52,11 +53,20 @@ class Player:
         # the below link was used to decide the opening strategy
         # http://www.trmph.com/hexwiki/Basic_strategy_guide.html
         if ((self.turn_counter == 1) and (self.player == const.RED)):
+            self.last_move = (0, 1)
             return (GameFile._ACTION_PLACE, 0, 1)
         
         # if it is blue we will place it in the center everytime to get control of the board
         if ((self.turn_counter == 1) and (self.player == const.BLUE)): 
+            self.last_move = (center, center)
             return (GameFile._ACTION_PLACE, center, center)
+    
+        # if it is not the first move
+        
+        # get neighbours
+        neighbours = self.board._coord_neighbours(self.last_move)
+        
+        print(f"the neighbours of {self.last_move} is {neighbours}")
         
         
         

@@ -60,13 +60,13 @@ value : distance to closest final node
 
 1. Start at initial state
 2. get neighbours of initial state
-3. get one neighbours neighbour list
-    Do the below for every element in the list neighbour neighbours list
-        a. if we place our piece and the opponent places theirs, we calculate in total how many pieces our team has
-        b. then we store this value for that pair
-            i. after each placement and capture we check the number of nodes in our team.
-            ii. instead of storing the value for each pair, we can compare and store only the minimum value, as we only need the minimum value.
-    We choose the one with the minimum value and then assign this value to the top node
+3. get one neighbours, neighbour list \n
+   Do the below for every element in the list neighbour neighbours list \n
+        a. if we place our piece and the opponent places theirs, we calculate in total how many pieces our team has \n
+        b. then we store this value for that pair \n
+            i. after each placement and capture we check the number of nodes in our team. \n
+            ii. instead of storing the value for each pair, we can compare and store only the minimum value, as we only need the minimum value. \n
+    We choose the one with the minimum value and then assign this value to the top node \n
 
 4. then we have to choose the Maximum value from the set of minimum values we have as it would be of our benefit and then we make the move that has this maximum value.
     
