@@ -49,7 +49,7 @@ No start and end for our path, we just have to include start and end coords in p
 key : coordinates
 value : distance to closest final node
 
-3.sort it by distance to the closest final coordinates and pick 1st one and add it to path
+3. sort it by distance to the closest final coordinates and pick 1st one and add it to path
     - This is because there can be multiple nodes with the same smallest distance
 
 4. check which node is closest to final in path and expand this to its neighbours and repeat step 2
