@@ -421,7 +421,7 @@ def _RENDER(
         color_code = ""
         if color == "r":
             color_code = "\033[31m"
-        if color == "b":
+        if color == "b": 
             color_code = "\033[34m"
         return f"{bold_code}{color_code}{str}\033[0m"
 
