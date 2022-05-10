@@ -62,28 +62,6 @@ class Player:
         if ((self.turn_counter == 1) and (self.player == const.BLUE)): 
             self.last_move = (center, center)
             return (GameFile._ACTION_PLACE, center, center)
-    
-        # if it is not the first move
-        
-        
-        # get neighbours of the initial state
-        neighbours = self.board._coord_neighbours(self.last_move)
-        
-        print(f"the neighbours of {self.last_move} is {neighbours}")
-        
-        # Get a neighbour's neighbour's list
-        for our_possible_moves in neighbours:
-            
-            opponent_possible_moves = temp_board._coord_neighbours(our_possible_moves)
-            
-            # Keep  
-            for opponent_move in opponent_possible_moves:
-                
-                temp_board = copy.deepcopy(self.board)
-                
-                temp_board.place(opponent_move)
-                
-                # count
         
 
     def turn(self, player, action):
@@ -118,11 +96,20 @@ class Player:
             if (self.turn_counter == const.ALLOWED_TO_STEAL_TURN):
                 self.board.swap()
         
-        
+        blue_counter = 0
+        red_counter = 0
         for i in range(self.size):
             for j in range(self.size):
-                print(f"({i},{j}) = {self.board.__getitem__((i,j))}")
+                if(self.board[((i,j))] == "blue"):
+                    blue_counter += 1
+                    print(f"blue color: {blue_counter}")
+                if(self.board[((i,j))] == "red"):
+                    red_counter += 1
+                    print(f"red color: {red_counter}")
+                    
+                # print(f"({i},{j}) = {self.board[((i,j))]}")
 
+        print(type(self.board[]))
 
         # The position of this would be an error
         self.turn_counter += 1
@@ -246,7 +233,7 @@ class Player:
             # count number of our pieces
             # we dont know how to do this yet
             number_of_pieces = 5
-             
+            
             # check if smallest and replace value as opponent will want 
             # the least for us
             if number_of_pieces < value:
