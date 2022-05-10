@@ -1,5 +1,8 @@
 from random import randint
+from re import S
 from typing import final
+
+from numpy import number
 from agent1.board import Board
 import referee.game as GameFile
 import agent1.constant as const
@@ -33,13 +36,6 @@ class Player:
         self.turn_counter = 1
         self.last_move = (0,0) # this is just a temp move
         
-        # getting the final set of coordinates for future reference
-        if (player == "red"):
-            final_coords1 = self.return_red_coords1()
-            final_coords2 = self.return_red_coords2()
-        else:
-            final_coords1 = self.return_blue_coords1()
-            final_coords2 = self.return_blue_coords2()
             
     def action(self):
         """
@@ -65,25 +61,13 @@ class Player:
     
         # if it is not the first move
         
-        
         # get neighbours of the initial state
         neighbours = self.board._coord_neighbours(self.last_move)
-        
         print(f"the neighbours of {self.last_move} is {neighbours}")
+        coord = self.minimax_decision(neighbours, self.board)
+        self.last_move = coord 
         
-        # Get a neighbour's neighbour's list
-        for our_possible_moves in neighbours:
-            
-            opponent_possible_moves = temp_board._coord_neighbours(our_possible_moves)
-            
-            # Keep  
-            for opponent_move in opponent_possible_moves:
-                
-                temp_board = copy.deepcopy(self.board)
-                
-                temp_board.place(opponent_move)
-                
-                # count
+        return (GameFile._ACTION_PLACE, int(coord[0]), int(coord[1]))
         
 
     def turn(self, player, action):
@@ -127,58 +111,6 @@ class Player:
         # The position of this would be an error
         self.turn_counter += 1
 
-    def return_red_coords1(self):
-        """
-        return the bottom row of coordinates in a list of tuples
-        """
-        
-        size = self.size
-        array = []
-        
-        for i in range(size):   
-            array.append((0,i))
-        
-        return array
-    
-    def return_red_coords2(self):
-        """
-        return the top row coordinates in a list of tuples
-        """
-        
-        size = self.size
-        array = []
-        
-        for i in range(size):   
-            array.append((size,i))
-        
-        return array
-
-    def return_blue_coords1(self):
-        """
-        return the bottom row of coordinates in a list of tuples
-        """
-        
-        size = self.size
-        array = []
-        
-        for i in range(size):   
-            array.append((i,0))
-        
-        return array
-    
-    def return_blue_coords2(self):
-        """
-        return the top row coordinates in a list of tuples
-        """
-        
-        size = self.size
-        array = []
-        
-        for i in range(size):   
-            array.append((i,size))
-        
-        return array
-
     def minimax_decision(self, neighbours, board):
         """
         
@@ -206,7 +138,11 @@ class Player:
             neighbours_list = board._coord_neighbours(move)
             
             # get the minimax utility value from the minimax_value function
-            value[move] = minimax_value(neighbours_list, move, board)
+            value[move] = self.minimax_value(neighbours_list,  
+                                        move, 
+                                        board,
+                                        const.A_LARGE_VALUE)
+            
         
         # Get the node which would lead us to have the largest number of pieces
         # after minimax calculation
@@ -215,9 +151,10 @@ class Player:
             if value[key] > maximum:
                 final_move = key
         
+        print(f"final move is {final_move}")
         return final_move
     
-    def minimax_value(neighbours_list, move, board):
+    def minimax_value(self, neighbours_list, move, board, value):
         
         """
         
@@ -230,35 +167,82 @@ class Player:
         move : the move that we do
         
         board : current game state of the board
+
+        value : the utility value
         
         """
-        for opponent_move in neighbours_list:
+        
+        if neighbours_list == []:
+            return value
+        else:
+            # get opponent move
+            # remove from the top
+            opponent_move = neighbours_list[0]
             
             # would reset to the earliest state we know of
             temp_board = copy.deepcopy(board)
             
-            # place our move on the board
-            temp_board.place(move)
             
+            print ("before move")
+            # place our move on the board
+            move_x = int(move[0])
+            move_y = int(move[1])
+            new_move = (move_x, move_y)
+
+            temp_board.place(self.player,new_move)
+
             # place the opponent move on the board
-            temp_board.place(opponent_move)
+            print("before opponent move")
+            
+            op_x = int(opponent_move[0])
+            op_y = int(opponent_move[1])
+            opponent_move = (op_x, op_y)
+
+
+            if (self.player == const.RED):
+                temp_board.place(const.BLUE,opponent_move)
+            else:
+                temp_board.place(const.RED, opponent_move)
+            
+            if (self.player == const.RED):
+                temp_board.place(const.BLUE,opponent_move)
+            else:
+                temp_board.place(const.RED, opponent_move)
             
             # count number of our pieces
-            # we dont know how to do this yet
-            number_of_pieces = 5
+            num_of_pieces = 0
+            for i in range(self.size):
+                for j in range(self.size):
+                    if(board[(i,j)] == self.player):
+                        num_of_pieces  += 1
+
              
             # check if smallest and replace value as opponent will want 
             # the least for us
-            if number_of_pieces < value:
-                value = number_of_pieces            
-        
-        return value
+            if num_of_pieces < value:
+                value = num_of_pieces
+                
+            updated_neighbours_list = copy.deepcopy(neighbours_list)
+            updated_neighbours_list.pop(0)
+            
+            print(f"our {move} = {updated_neighbours_list}")
+            
+            # returns self.
+            # returns self.minimax_value(updated_neighbours)
+            return self.minimax_value(updated_neighbours_list,
+                                 move,
+                                 board,
+                                 value)
+
         # This is the opponent playing
         # place first element of neighbours_list in board
         # temp_board.place(???, ())
         
         # count how many of our piece are there
+        
+        # 
 
+    
         
         
 
