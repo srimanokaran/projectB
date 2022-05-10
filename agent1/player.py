@@ -64,6 +64,7 @@ class Player:
         # get neighbours of the initial state
         neighbours = self.board._coord_neighbours(self.last_move)
         print(f"the neighbours of {self.last_move} is {neighbours}")
+        
         coord = self.minimax_decision(neighbours, self.board)
         self.last_move = coord 
         
@@ -111,6 +112,37 @@ class Player:
         # The position of this would be an error
         self.turn_counter += 1
 
+    def get_occupied(self ,board):
+        
+        """
+        At a given instance return the occupied cells in the board
+        """
+        
+        occupied = []
+        size = self.size
+        for i in range(size):
+            for j in range(size):
+                if (board[(i,j)] != None):
+                    occupied.append((i,j))
+        
+        return occupied
+
+    def remove_occupied(self, neighbours_list, board):
+        """
+        
+        from neighbours_list remove all elements from occupied list and return the list
+        
+        occupied_list has all the nodes in the board that are occupied
+        """
+        
+        occupied_list = self.get_occupied(board)
+        
+        for coord in occupied_list:
+            neighbours_list.remove(coord)
+        
+        return neighbours_list
+        
+    
     def minimax_decision(self, neighbours, board):
         """
         
@@ -135,7 +167,9 @@ class Player:
             
             # get the possible moves the opponent can do
             # in our case we limit this to  the neighbours of neigbhours
-            neighbours_list = board._coord_neighbours(move)
+            neighbours_list_all = board._coord_neighbours(move)
+            
+            neighbours_list = self.remove_occupied(neighbours_list_all,board)
             
             # get the minimax utility value from the minimax_value function
             value[move] = self.minimax_value(neighbours_list,  
@@ -146,12 +180,33 @@ class Player:
         
         # Get the node which would lead us to have the largest number of pieces
         # after minimax calculation
+        
+        # maximum will be the highest utility value
+        neighbours_utility_list = []
         maximum = const.A_SMALL_VALUE
         for key in value:
             if value[key] > maximum:
-                final_move = key
+                maximum = value[key]
+            
+
         
-        print(f"final move is {final_move}")
+        # Get nodes with highest utility value in a list
+        # place in a list 
+        for key in value:
+            if (value[key] == maximum):
+                neighbours_utility_list.append(key)
+        
+        maximum = const.A_SMALL_VALUE
+        
+        # Find the neighbour in the list of neighbours with highest utility value that has the most 
+        # ougoing/open neighbours
+        for neighbour in neighbours_utility_list:
+            length = len(self.board._coord_neighbours(neighbour))       
+            if length > maximum:
+                maximum = length
+                final_coord = neighbour
+
+        print(f"final move is {final_coord}")
         return final_move
     
     def minimax_value(self, neighbours_list, move, board, value):
@@ -197,12 +252,6 @@ class Player:
             op_x = int(opponent_move[0])
             op_y = int(opponent_move[1])
             opponent_move = (op_x, op_y)
-
-
-            if (self.player == const.RED):
-                temp_board.place(const.BLUE,opponent_move)
-            else:
-                temp_board.place(const.RED, opponent_move)
             
             if (self.player == const.RED):
                 temp_board.place(const.BLUE,opponent_move)
@@ -245,4 +294,5 @@ class Player:
     
         
         
+
 

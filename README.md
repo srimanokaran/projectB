@@ -109,6 +109,8 @@ function minimax-value(neighbours_list, board, value):
 
 '''
     
+nótes:
+    check if neighbouring cells are preoccupíed
 
 
 # References
