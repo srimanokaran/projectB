@@ -44,12 +44,12 @@ final_coords = []
 make neighbour nodes the next possible moves.
 No start and end for our path, we just have to include start and end coords in path
 
-2. put all nieghbouring nodes into a dictionary 
+2. put all neighbouring nodes into a dictionary 
 
 key : coordinates
 value : distance to closest final node
 
-3.sort it by distance to the closest final coordinates and pick 1st one and add it to path
+3. sort it by distance to the closest final coordinates and pick 1st one and add it to path
     - This is because there can be multiple nodes with the same smallest distance
 
 4. check which node is closest to final in path and expand this to its neighbours and repeat step 2
@@ -60,15 +60,51 @@ value : distance to closest final node
 
 1. Start at initial state
 2. get neighbours of initial state
-3. get one neighbours neighbour list
-    Do the below for every element in the list neighbour neighbours list
+3. get one neighbours, neighbour list
+   Do the below for every element in the list neighbour neighbours list
         a. if we place our piece and the opponent places theirs, we calculate in total how many pieces our team has
         b. then we store this value for that pair
-            i. after each placement and capture we check the number of nodes in our team.
+            i. after each placement and capture we check the number of nodes in our team. 
             ii. instead of storing the value for each pair, we can compare and store only the minimum value, as we only need the minimum value.
     We choose the one with the minimum value and then assign this value to the top node
 
 4. then we have to choose the Maximum value from the set of minimum values we have as it would be of our benefit and then we make the move that has this maximum value.
+
+# MiniMax value function
+'''
+function minimax-decision:
+
+    # this is our move
+    value is a dictionary then we sort it by value to get the 
+    move with the largest value and then do this move
+
+    for each move in neighbours:
+        value[move] = minimax-value (find_neighbours(move))
+    end
+    return largest value in valuelist
+
+'''
+
+'''
+function minimax-value(neighbours_list, board, value):
+    if neighbours_list = []:
+        return value
+    else 
+        temp_board = deepcopy of board
+        
+        # This is the opponent playing
+        place first element of neighbours_list in board
+        
+        count how many of our piece are there
+
+        if number of our pieces less than value:
+            then value = number of our pieces
+        
+        remove the element from the neighbours list
+
+        return minimax-value(updated neighbours_list, board, value)
+
+'''
     
 
 

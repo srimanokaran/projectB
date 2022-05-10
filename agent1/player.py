@@ -1,7 +1,9 @@
 from random import randint
+from typing import final
 from agent1.board import Board
 import referee.game as GameFile
 import agent1.constant as const
+import copy
 
 class Player:
     """
@@ -29,6 +31,7 @@ class Player:
         self.size = n
         self.player = player
         self.turn_counter = 1
+        self.last_move = (0,0) # this is just a temp move
         
         # getting the final set of coordinates for future reference
         if (player == "red"):
@@ -52,16 +55,37 @@ class Player:
         # the below link was used to decide the opening strategy
         # http://www.trmph.com/hexwiki/Basic_strategy_guide.html
         if ((self.turn_counter == 1) and (self.player == const.RED)):
+            self.last_move = (0, 1)
             return (GameFile._ACTION_PLACE, 0, 1)
         
         # if it is blue we will place it in the center everytime to get control of the board
         if ((self.turn_counter == 1) and (self.player == const.BLUE)): 
+            self.last_move = (center, center)
             return (GameFile._ACTION_PLACE, center, center)
-        
-        
-        
-        
     
+        # if it is not the first move
+        
+        
+        # get neighbours of the initial state
+        neighbours = self.board._coord_neighbours(self.last_move)
+        
+        print(f"the neighbours of {self.last_move} is {neighbours}")
+        
+        # Get a neighbour's neighbour's list
+        for our_possible_moves in neighbours:
+            
+            opponent_possible_moves = temp_board._coord_neighbours(our_possible_moves)
+            
+            # Keep  
+            for opponent_move in opponent_possible_moves:
+                
+                temp_board = copy.deepcopy(self.board)
+                
+                temp_board.place(opponent_move)
+                
+                # count
+        
+
     def turn(self, player, action):
         """
         Called at the end of each player's turn to inform this player of 
@@ -98,6 +122,7 @@ class Player:
         for i in range(self.size):
             for j in range(self.size):
                 print(f"({i},{j}) = {self.board.__getitem__((i,j))}")
+
 
         # The position of this would be an error
         self.turn_counter += 1
@@ -153,3 +178,87 @@ class Player:
             array.append((i,size))
         
         return array
+
+    def minimax_decision(self, neighbours, board):
+        """
+        
+        returns the node that we are going to place the board based on minimax
+        calculation taught in lectures
+        
+        neighbours : list of neighbours of the last node that was placed on
+        the grid
+        
+        board : last game state of the board that we had 
+        
+        """
+        
+        # value is a dictionary with
+        # key : coordinate
+        # value : the number of neighbours
+        value = {}
+        
+        # go through any move that we can possibly do next
+        # in our case we limit this to neighbours of the current node
+        for move in neighbours:
+            
+            # get the possible moves the opponent can do
+            # in our case we limit this to  the neighbours of neigbhours
+            neighbours_list = board._coord_neighbours(move)
+            
+            # get the minimax utility value from the minimax_value function
+            value[move] = minimax_value(neighbours_list, move, board)
+        
+        # Get the node which would lead us to have the largest number of pieces
+        # after minimax calculation
+        maximum = const.A_SMALL_VALUE
+        for key in value:
+            if value[key] > maximum:
+                final_move = key
+        
+        return final_move
+    
+    def minimax_value(neighbours_list, move, board):
+        
+        """
+        
+        returns the utility value 
+        
+        utility value : the number of pieces our colour has on the grid
+        
+        neighbours_list : is the list of nodes that the opponent could do 
+        
+        move : the move that we do
+        
+        board : current game state of the board
+        
+        """
+        for opponent_move in neighbours_list:
+            
+            # would reset to the earliest state we know of
+            temp_board = copy.deepcopy(board)
+            
+            # place our move on the board
+            temp_board.place(move)
+            
+            # place the opponent move on the board
+            temp_board.place(opponent_move)
+            
+            # count number of our pieces
+            # we dont know how to do this yet
+            number_of_pieces = 5
+             
+            # check if smallest and replace value as opponent will want 
+            # the least for us
+            if number_of_pieces < value:
+                value = number_of_pieces            
+        
+        return value
+        # This is the opponent playing
+        # place first element of neighbours_list in board
+        # temp_board.place(???, ())
+        
+        # count how many of our piece are there
+
+        
+        
+
