@@ -138,7 +138,8 @@ class Player:
         occupied_list = self.get_occupied(board)
         
         for coord in occupied_list:
-            neighbours_list.remove(coord)
+            if coord in neighbours_list:
+                neighbours_list.remove(coord)
         
         return neighbours_list
         
@@ -166,9 +167,10 @@ class Player:
         for move in neighbours:
             
             # get the possible moves the opponent can do
-            # in our case we limit this to  the neighbours of neigbhours
+            # in our case we limit this to  the neighbours of our possible move
             neighbours_list_all = board._coord_neighbours(move)
             
+            # the possible moves cant consist of already taken nodes
             neighbours_list = self.remove_occupied(neighbours_list_all,board)
             
             # get the minimax utility value from the minimax_value function
@@ -182,7 +184,6 @@ class Player:
         # after minimax calculation
         
         # maximum will be the highest utility value
-        neighbours_utility_list = []
         maximum = const.A_SMALL_VALUE
         for key in value:
             if value[key] > maximum:
@@ -192,28 +193,41 @@ class Player:
         
         # Get nodes with highest utility value in a list
         # place in a list 
+        neighbours_utility_list = []
         for key in value:
             if (value[key] == maximum):
                 neighbours_utility_list.append(key)
         
         maximum = const.A_SMALL_VALUE
         
-        # Find the neighbour in the list of neighbours with highest utility value that has the most 
+        # Find the neighbour in the list of neighbours with 
+        # highest utility value that has the most 
         # ougoing/open neighbours
         for neighbour in neighbours_utility_list:
-            length = len(self.board._coord_neighbours(neighbour))       
+            temp = self.board._coord_neighbours(neighbour)
+            temp_removed = self.remove_occupied(temp, board)
+            length = len(temp_removed)
+            print(f"so i want to know what this value is = {temp_removed}")      
             if length > maximum:
                 maximum = length
                 final_coord = neighbour
 
         print(f"final move is {final_coord}")
-        return final_move
+        return final_coord
     
     def minimax_value(self, neighbours_list, move, board, value):
         
         """
         
-        returns the utility value 
+        returns the utility value for our current move
+            - utility value : the number of our piece that we have on the board left 
+            - since the opponenet would want us to have the least number of pieces in the board,
+            this function goes through all possible opponent moves and choose the move that would 
+            be least beneficial for us
+            - then return the number of nodes that would be left in the board if that move is made
+            by the opponent
+
+              
         
         utility value : the number of pieces our colour has on the grid
         
@@ -231,7 +245,6 @@ class Player:
             return value
         else:
             # get opponent move
-            # remove from the top
             opponent_move = neighbours_list[0]
             
             # would reset to the earliest state we know of
@@ -271,26 +284,17 @@ class Player:
             if num_of_pieces < value:
                 value = num_of_pieces
                 
-            updated_neighbours_list = copy.deepcopy(neighbours_list)
-            updated_neighbours_list.pop(0)
+            # remove the node from the top
+            neighbours_list.pop(0)
             
-            print(f"our {move} = {updated_neighbours_list}")
+            print(f"our {move} = {neighbours_list}")
             
             # returns self.
             # returns self.minimax_value(updated_neighbours)
-            return self.minimax_value(updated_neighbours_list,
+            return self.minimax_value(neighbours_list,
                                  move,
                                  board,
                                  value)
-
-        # This is the opponent playing
-        # place first element of neighbours_list in board
-        # temp_board.place(???, ())
-        
-        # count how many of our piece are there
-        
-        # 
-
     
         
         
