@@ -1,6 +1,4 @@
-from random import randint
-from re import S
-from typing import final
+
 
 from numpy import number
 from agent1.board import Board
@@ -18,6 +16,8 @@ class Player:
             - other for agent 2
         - These functions are called for the sole purpose of updating the local board we have 
         and for the referee to update the global board
+
+    In this version of our player's possible move is always a neighbour node
     
     """
     
@@ -35,6 +35,16 @@ class Player:
         self.player = player
         self.turn_counter = 1
         self.last_move = (0,0) # this is just a temp move
+        
+        # getting the final set of coordinates for future reference
+        if (player == "red"):
+            final_coords1 = self.return_red_coords1()
+            final_coords2 = self.return_red_coords2()
+        else:
+            final_coords1 = self.return_blue_coords1()
+            final_coords2 = self.return_blue_coords2()
+        
+        final_coords = final_coords1 + final_coords2
         
             
     def action(self):
@@ -137,12 +147,12 @@ class Player:
         
         occupied_list = self.get_occupied(board)
         
+        
         for coord in occupied_list:
             if coord in neighbours_list:
                 neighbours_list.remove(coord)
         
-        return neighbours_list
-        
+        return neighbours_list 
     
     def minimax_decision(self, neighbours, board):
         """
@@ -157,7 +167,6 @@ class Player:
         
         """
         
-        # value is a dictionary with
         # key : coordinate
         # value : the number of neighbours
         value = {}
@@ -188,29 +197,31 @@ class Player:
         for key in value:
             if value[key] > maximum:
                 maximum = value[key]
-            
-
-        
-        # Get nodes with highest utility value in a list
-        # place in a list 
-        neighbours_utility_list = []
+                
+        # Get nodes with highest utility value from the possible moves we can do and place it in a list
+        possible_moves_temp = []
         for key in value:
             if (value[key] == maximum):
-                neighbours_utility_list.append(key)
+                possible_moves_temp.append(key)
         
+        possible_moves = self.remove_occupied(possible_moves_temp, board)
+        
+        # Find the move in our list of possible moves which has the which has the least number of
+        # neighbouring occupied nodes, this will be our final move
         maximum = const.A_SMALL_VALUE
-        
-        # Find the neighbour in the list of neighbours with 
-        # highest utility value that has the most 
-        # ougoing/open neighbours
-        for neighbour in neighbours_utility_list:
-            temp = self.board._coord_neighbours(neighbour)
+        for move in possible_moves:
+            # Get neighbours
+            temp = self.board._coord_neighbours(move)
+            
+            # get neighbours that are free
             temp_removed = self.remove_occupied(temp, board)
-            length = len(temp_removed)
-            print(f"so i want to know what this value is = {temp_removed}")      
-            if length > maximum:
-                maximum = length
-                final_coord = neighbour
+            
+            
+            number_of_free_nodes = len(temp_removed)
+            
+            if number_of_free_nodes > maximum:
+                maximum = number_of_free_nodes
+                final_coord = move
 
         print(f"final move is {final_coord}")
         return final_coord
@@ -289,14 +300,60 @@ class Player:
             
             print(f"our {move} = {neighbours_list}")
             
-            # returns self.
             # returns self.minimax_value(updated_neighbours)
             return self.minimax_value(neighbours_list,
                                  move,
                                  board,
                                  value)
     
+    def return_red_coords1(self):
+        """
+        return the bottom row of coordinates in a list of tuples
+        """
         
+        size = self.size
+        array = []
         
+        for i in range(size):   
+            array.append((0,i))
+        
+        return array
+    
+    def return_red_coords2(self):
+        """
+        return the top row coordinates in a list of tuples
+        """
+        
+        size = self.size
+        array = []
+        
+        for i in range(size):   
+            array.append((size,i))
+        
+        return array
 
-
+    def return_blue_coords1(self):
+        """
+        return the bottom row of coordinates in a list of tuples
+        """
+        
+        size = self.size
+        array = []
+        
+        for i in range(size):   
+            array.append((i,0))
+        
+        return array
+    
+    def return_blue_coords2(self):
+        """
+        return the top row coordinates in a list of tuples
+        """
+        
+        size = self.size
+        array = []
+        
+        for i in range(size):   
+            array.append((i,size))
+        
+        return 

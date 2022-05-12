@@ -108,6 +108,8 @@ function minimax-value(neighbours_list, board, value):
         return minimax-value(updated neighbours_list, board, value)
 
 '''
+
+
     
 nótes:
     check if neighbouring cells are preoccupíed
