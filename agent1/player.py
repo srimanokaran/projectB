@@ -38,13 +38,11 @@ class Player:
         
         # getting the final set of coordinates for future reference
         if (player == "red"):
-            final_coords1 = self.return_red_coords1()
-            final_coords2 = self.return_red_coords2()
+            self.final_coords1 = self.return_red_coords1()
+            self.final_coords2 = self.return_red_coords2()
         else:
-            final_coords1 = self.return_blue_coords1()
-            final_coords2 = self.return_blue_coords2()
-        
-        final_coords = final_coords1 + final_coords2
+            self.final_coords1 = self.return_blue_coords1()
+            self.final_coords2 = self.return_blue_coords2()
         
             
     def action(self):
@@ -147,7 +145,6 @@ class Player:
         
         occupied_list = self.get_occupied(board)
         
-        
         for coord in occupied_list:
             if coord in neighbours_list:
                 neighbours_list.remove(coord)
@@ -206,8 +203,9 @@ class Player:
         
         possible_moves = self.remove_occupied(possible_moves_temp, board)
         
+        # we have to come up a different method for this section of the code
         # Find the move in our list of possible moves which has the which has the least number of
-        # neighbouring occupied nodes, this will be our final move
+        # neighbouring occupied nodes, this will be our final move   
         maximum = const.A_SMALL_VALUE
         for move in possible_moves:
             # Get neighbours
@@ -216,15 +214,68 @@ class Player:
             # get neighbours that are free
             temp_removed = self.remove_occupied(temp, board)
             
-            
             number_of_free_nodes = len(temp_removed)
             
+            connected_coords = board.connected_coords(self.last_move)
+            
+            last_coord = self.final_move(move, connected_coords)
+            
+            if (last_coord):
+                return last_coord
+
+            print(f"number of free nodes is {number_of_free_nodes}")
             if number_of_free_nodes > maximum:
                 maximum = number_of_free_nodes
                 final_coord = move
 
         print(f"final move is {final_coord}")
         return final_coord
+    
+    def final_move(self, move, connected_coords):
+        
+        final_coord = False
+        
+        if (self.in_one_row(connected_coords) == True):
+            if (move in self.final_coords2):
+                
+                final_coord = move
+                
+        elif (self.in_the_other_row(connected_coords) == True):
+            if (move in self.final_coords1):
+                print("Hello darkness my old friend")
+                final_coord = move
+        
+        return final_coord
+    
+    def in_one_row(self, connected_coords):
+        
+        """
+        
+        if a node in final_coords1 is in the path we have now
+        return True else False
+        
+        """
+        
+        for node in self.final_coords1:
+            if node in connected_coords:
+                return True 
+        return False
+            
+    def in_the_other_row(self, connected_coords):
+        
+        """
+        
+        if a node in final_coords2 is in the path we have now
+        return True else False
+        
+        """
+        
+        for node in self.final_coords2:
+            if node in connected_coords:
+                return True
+                
+        return False
+        
     
     def minimax_value(self, neighbours_list, move, board, value):
         
