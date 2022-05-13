@@ -38,7 +38,7 @@ class Player:
         self.last_move = (0,0) # this is just a temp move
         
         # getting the final set of coordinates for future reference
-        if (player == "red"):
+        if (player == const.RED):
             self.final_coords1 = self.return_red_coords1()
             self.final_coords2 = self.return_red_coords2()
         else:
@@ -136,6 +136,21 @@ class Player:
         # value : the number of neighbours
         value = {}
         
+        # Final coordinates check:
+        for move in neighbours:
+            
+            connected_coords = board.connected_coords(self.last_move)
+            int_connected_coords = self.convert_coords_to_int(connected_coords)
+            last_coord = self.final_move(move, int_connected_coords)
+            print(f"final_coords1 == : {self.final_coords1}")
+            print(f"final_coords2 == : {self.final_coords2}")
+            
+            print(f"int_connected_coords: {int_connected_coords}")
+            print(f"last_coord: {last_coord}")
+            
+            if (last_coord):
+                return last_coord
+        
         # go through any move that we can possibly do next
         # in our case we limit this to neighbours of the current node
         for move in neighbours:
@@ -143,6 +158,8 @@ class Player:
             # get the possible moves the opponent can do
             # in our case we limit this to  the neighbours of our possible move
             neighbours_list_all = board._coord_neighbours(move)
+            
+            # add neighbours of neighbours as a possible move to figure out if you could do a possible 
             
             # the possible moves cant consist of already taken nodes
             neighbours_list = self.remove_occupied(neighbours_list_all,board)
@@ -167,6 +184,9 @@ class Player:
         print("The value is: ")
         print(value)
         
+        
+            
+        
         # maximum will be the highest utility value
         maximum = const.A_SMALL_VALUE
         for key in value:
@@ -178,7 +198,9 @@ class Player:
         possible_moves_temp = []
         for key in value:
             if (value[key] == maximum):
+                # Moves that can be captured are not appened
                 possible_moves_temp.append(key)
+        
         
         possible_moves = self.remove_occupied(possible_moves_temp, board)
         print(f"Possible moves after removed: {possible_moves}")
@@ -196,18 +218,6 @@ class Player:
             temp_removed = self.remove_occupied(temp, board)
             
             number_of_free_nodes = len(temp_removed)
-            
-            connected_coords = board.connected_coords(self.last_move)
-            int_connected_coords = self.convert_coords_to_int(connected_coords)
-            last_coord = self.final_move(move, int_connected_coords)
-            print(f"final_coords1 == : {self.final_coords1}")
-            print(f"final_coords2 == : {self.final_coords2}")
-            
-            print(f"int_connected_coords: {int_connected_coords}")
-            print(f"last_coord: {last_coord}")
-            
-            if (last_coord):
-                return last_coord
 
             # print(f"number of free nodes is {number_of_free_nodes}")
             if number_of_free_nodes > maximum:
@@ -220,7 +230,6 @@ class Player:
     def minimax_value(self, neighbours_list, move, board, value):
         
         """
-        
         returns the utility value for our current move
             - utility value : the number of our piece that we have on the board left 
             - since the opponenet would want us to have the least number of pieces in the board,
@@ -231,7 +240,7 @@ class Player:
 
               
         
-        utility value : the number of pieces our colour has on the grid
+        utility value : (the number of pieces our colour has on the grid) - (number of opponent pieces on  the grid)
         
         neighbours_list : is the list of nodes that the opponent could do 
         
@@ -274,17 +283,19 @@ class Player:
                 temp_board.place(const.RED, opponent_move)
             
             # count number of our pieces
-            num_of_pieces = 0
-            for i in range(self.size):
-                for j in range(self.size):
-                    if(board[(i,j)] == self.player):
-                        num_of_pieces  += 1
+            num_of_our_pieces = self.count_number_of_pieces(self.player, temp_board)
+            
+            if (self.player == const.RED):
+                num_of_opponent_pieces = self.count_number_of_pieces(const.BLUE, temp_board)
+            else:
+                num_of_opponent_pieces = self.count_number_of_pieces(const.RED, temp_board)
+            
+            utility_value = (num_of_our_pieces) - (num_of_opponent_pieces)
 
-             
             # check if smallest and replace value as opponent will want 
             # the least for us
-            if num_of_pieces < value:
-                value = num_of_pieces
+            if utility_value < value:
+                value = utility_value
                 
             # remove the node from the top
             neighbours_list.pop(0)
@@ -337,8 +348,6 @@ class Player:
         return True else False
         
         """
-        
-        
         
         for node in self.final_coords2:
             if node in connected_coords:
@@ -425,9 +434,9 @@ class Player:
         array = []
         
         for i in range(size):   
-            array.append((i,size))
+            array.append((i,size-1))
         
-        return 
+        return array
 
     def convert_coords_to_int(self, coords_list):
         """
@@ -446,3 +455,20 @@ class Player:
             final_list.append((int(coord[0]), int(coord[1])))
         
         return final_list
+    
+    def count_number_of_pieces(self, colour, temp_board):
+        
+        """
+        Returns the number of pieces of a colour in temp_board
+
+        Returns:
+            int : numbero of pieces of a certain colour in a board
+        """
+        
+        num_of_pieces = 0
+        for i in range(self.size):
+            for j in range(self.size):
+                if(temp_board[(i,j)] == colour):
+                    num_of_pieces  += 1
+        
+        return num_of_pieces
