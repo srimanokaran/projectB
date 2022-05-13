@@ -64,9 +64,9 @@ class Player:
             return (GameFile._ACTION_PLACE, 0, 1)
         
         # if it is blue we will place it in the center everytime to get control of the board
-        if ((self.turn_counter == 1) and (self.player == const.BLUE)): 
-            self.last_move = (center, center)
-            return (GameFile._ACTION_PLACE, center, center)
+        if ((self.turn_counter == 2) and (self.player == const.BLUE)): 
+            self.last_move = (1, 0)
+            return (GameFile._ACTION_PLACE, 1, 0)
     
         # if it is not the first move
         
@@ -290,6 +290,9 @@ class Player:
             else:
                 num_of_opponent_pieces = self.count_number_of_pieces(const.RED, temp_board)
             
+            print(f"The oppnent move is : {opponent_move}")
+            print(f"number of our pieces : {num_of_our_pieces}")
+            print(f"number of opponent pieces : {num_of_opponent_pieces}")
             utility_value = (num_of_our_pieces) - (num_of_opponent_pieces)
 
             # check if smallest and replace value as opponent will want 
