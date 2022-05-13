@@ -1,5 +1,6 @@
 
 
+from matplotlib.pyplot import connect
 from numpy import number
 from agent1.board import Board
 import referee.game as GameFile
@@ -71,9 +72,11 @@ class Player:
         
         # get neighbours of the initial state
         neighbours = self.board._coord_neighbours(self.last_move)
-        print(f"the neighbours of {self.last_move} is {neighbours}")
         
-        coord = self.minimax_decision(neighbours, self.board)
+        removed_neighbours = self.remove_occupied(neighbours, self.board)
+        
+        coord = self.minimax_decision(removed_neighbours, self.board)
+        
         self.last_move = coord 
         
         return (GameFile._ACTION_PLACE, int(coord[0]), int(coord[1]))
@@ -110,46 +113,11 @@ class Player:
         elif (action[0] == GameFile._ACTION_STEAL):
             if (self.turn_counter == const.ALLOWED_TO_STEAL_TURN):
                 self.board.swap()
-        
-        
-        for i in range(self.size):
-            for j in range(self.size):
-                print(f"({i},{j}) = {self.board.__getitem__((i,j))}")
-
-
+                
         # The position of this would be an error
         self.turn_counter += 1
 
-    def get_occupied(self ,board):
-        
-        """
-        At a given instance return the occupied cells in the board
-        """
-        
-        occupied = []
-        size = self.size
-        for i in range(size):
-            for j in range(size):
-                if (board[(i,j)] != None):
-                    occupied.append((i,j))
-        
-        return occupied
-
-    def remove_occupied(self, neighbours_list, board):
-        """
-        
-        from neighbours_list remove all elements from occupied list and return the list
-        
-        occupied_list has all the nodes in the board that are occupied
-        """
-        
-        occupied_list = self.get_occupied(board)
-        
-        for coord in occupied_list:
-            if coord in neighbours_list:
-                neighbours_list.remove(coord)
-        
-        return neighbours_list 
+    
     
     def minimax_decision(self, neighbours, board):
         """
@@ -179,22 +147,33 @@ class Player:
             # the possible moves cant consist of already taken nodes
             neighbours_list = self.remove_occupied(neighbours_list_all,board)
             
+            if len(neighbours_list) == 0:
+                value[move] = 0
+                continue
+            
             # get the minimax utility value from the minimax_value function
             value[move] = self.minimax_value(neighbours_list,  
                                         move, 
                                         board,
                                         const.A_LARGE_VALUE)
+
+            
             
         
         # Get the node which would lead us to have the largest number of pieces
         # after minimax calculation
+        print("The initial move is:")
+        print(self.last_move)
+        print("The value is: ")
+        print(value)
         
         # maximum will be the highest utility value
         maximum = const.A_SMALL_VALUE
         for key in value:
             if value[key] > maximum:
-                maximum = value[key]
-                
+                maximum = value[key] 
+        print(f"maximum: {maximum}")  
+              
         # Get nodes with highest utility value from the possible moves we can do and place it in a list
         possible_moves_temp = []
         for key in value:
@@ -202,12 +181,14 @@ class Player:
                 possible_moves_temp.append(key)
         
         possible_moves = self.remove_occupied(possible_moves_temp, board)
+        print(f"Possible moves after removed: {possible_moves}")
         
         # we have to come up a different method for this section of the code
         # Find the move in our list of possible moves which has the which has the least number of
         # neighbouring occupied nodes, this will be our final move   
         maximum = const.A_SMALL_VALUE
         for move in possible_moves:
+            
             # Get neighbours
             temp = self.board._coord_neighbours(move)
             
@@ -217,66 +198,25 @@ class Player:
             number_of_free_nodes = len(temp_removed)
             
             connected_coords = board.connected_coords(self.last_move)
+            int_connected_coords = self.convert_coords_to_int(connected_coords)
+            last_coord = self.final_move(move, int_connected_coords)
+            print(f"final_coords1 == : {self.final_coords1}")
+            print(f"final_coords2 == : {self.final_coords2}")
             
-            last_coord = self.final_move(move, connected_coords)
+            print(f"int_connected_coords: {int_connected_coords}")
+            print(f"last_coord: {last_coord}")
             
             if (last_coord):
                 return last_coord
 
-            print(f"number of free nodes is {number_of_free_nodes}")
+            # print(f"number of free nodes is {number_of_free_nodes}")
             if number_of_free_nodes > maximum:
                 maximum = number_of_free_nodes
                 final_coord = move
 
-        print(f"final move is {final_coord}")
+        # print(f"final move is {final_coord}")
         return final_coord
-    
-    def final_move(self, move, connected_coords):
-        
-        final_coord = False
-        
-        if (self.in_one_row(connected_coords) == True):
-            if (move in self.final_coords2):
-                
-                final_coord = move
-                
-        elif (self.in_the_other_row(connected_coords) == True):
-            if (move in self.final_coords1):
-                print("Hello darkness my old friend")
-                final_coord = move
-        
-        return final_coord
-    
-    def in_one_row(self, connected_coords):
-        
-        """
-        
-        if a node in final_coords1 is in the path we have now
-        return True else False
-        
-        """
-        
-        for node in self.final_coords1:
-            if node in connected_coords:
-                return True 
-        return False
-            
-    def in_the_other_row(self, connected_coords):
-        
-        """
-        
-        if a node in final_coords2 is in the path we have now
-        return True else False
-        
-        """
-        
-        for node in self.final_coords2:
-            if node in connected_coords:
-                return True
-                
-        return False
-        
-    
+
     def minimax_value(self, neighbours_list, move, board, value):
         
         """
@@ -313,16 +253,16 @@ class Player:
             temp_board = copy.deepcopy(board)
             
             
-            print ("before move")
+            # print ("before move")
             # place our move on the board
-            move_x = int(move[0])
+            move_x = int(move[0]) 
             move_y = int(move[1])
             new_move = (move_x, move_y)
 
             temp_board.place(self.player,new_move)
 
             # place the opponent move on the board
-            print("before opponent move")
+            # print("before opponent move")
             
             op_x = int(opponent_move[0])
             op_y = int(opponent_move[1])
@@ -349,13 +289,93 @@ class Player:
             # remove the node from the top
             neighbours_list.pop(0)
             
-            print(f"our {move} = {neighbours_list}")
+            # print(f"our {move} = {neighbours_list}")
             
             # returns self.minimax_value(updated_neighbours)
             return self.minimax_value(neighbours_list,
                                  move,
                                  board,
                                  value)
+    
+    def final_move(self, move, connected_coords):
+        
+        final_coord = False
+        
+        if (self.in_one_row(connected_coords) == True):
+            if (move in self.final_coords2):
+                
+                final_coord = move
+                
+        elif (self.in_the_other_row(connected_coords) == True):
+            if (move in self.final_coords1):
+                final_coord = move
+        
+        return final_coord
+    
+    def in_one_row(self, connected_coords):
+        
+        """
+        
+        if a node in final_coords1 is in the path we have now
+        return True else False
+        
+        """
+        
+        temp = []
+            
+        
+        for node in self.final_coords1:            
+            if node in connected_coords:
+                return True 
+        return False
+            
+    def in_the_other_row(self, connected_coords):
+        
+        """
+        
+        if a node in final_coords2 is in the path we have now
+        return True else False
+        
+        """
+        
+        
+        
+        for node in self.final_coords2:
+            if node in connected_coords:
+                return True
+                
+        return False
+    
+    def get_occupied(self ,board):
+        
+        """
+        At a given instance return the occupied cells in the board
+        """
+        
+        occupied = []
+        size = self.size
+        for i in range(size):
+            for j in range(size):
+                if (board[(i,j)] != None):
+                    occupied.append((i,j))
+        
+        return occupied
+
+    def remove_occupied(self, neighbours_list, board):
+        """
+        
+        from neighbours_list remove all elements from occupied list and return the list
+        
+        occupied_list has all the nodes in the board that are occupied
+        """
+        
+        occupied_list = self.get_occupied(board)
+        
+        for coord in occupied_list:
+            if coord in neighbours_list:
+                neighbours_list.remove(coord)
+        
+        return neighbours_list 
     
     def return_red_coords1(self):
         """
@@ -379,7 +399,7 @@ class Player:
         array = []
         
         for i in range(size):   
-            array.append((size,i))
+            array.append((size-1,i))
         
         return array
 
@@ -408,3 +428,21 @@ class Player:
             array.append((i,size))
         
         return 
+
+    def convert_coords_to_int(self, coords_list):
+        """
+        
+        Convert all coordinates in coords_list from numpy.int64 to int
+
+        Args:
+            coords_list ([(x,y)]): where x and y are of type int64
+        Returns:
+            [(x,y)]: where x and y are of type int
+        """
+        
+        final_list = []
+        
+        for coord in coords_list:
+            final_list.append((int(coord[0]), int(coord[1])))
+        
+        return final_list
