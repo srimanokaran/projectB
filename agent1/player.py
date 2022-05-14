@@ -75,11 +75,39 @@ class Player:
         
         removed_neighbours = self.remove_occupied(neighbours, self.board)
         
-        coord = self.minimax_decision(removed_neighbours, self.board)
+        # Final coordinates check:
+        for move in neighbours:
+            
+            connected_coords = self.board.connected_coords(self.last_move)
+            int_connected_coords = self.convert_coords_to_int(connected_coords)
+            last_coord = self.final_move(move, int_connected_coords)
+            print(f"final_coords1 == : {self.final_coords1}")
+            print(f"final_coords2 == : {self.final_coords2}")
+            
+            print(f"int_connected_coords: {int_connected_coords}")
+            print(f"last_coord: {last_coord}")
+            
+            if (last_coord):
+                return last_coord
         
-        self.last_move = coord 
+        # if not a final move then get minimax decision
+        minimax_coord = self.minimax_decision(removed_neighbours, self.board)
         
-        return (GameFile._ACTION_PLACE, int(coord[0]), int(coord[1]))
+        if (minimax_coord == False):
+            
+            """check for a depth 2 move/capture and if so proceed with that"""
+            
+            """check for a backtrack move and proceed with that"""
+            
+            # get a list of path that you can back track in
+            connected_coords = self.board.connected_coords(self.last_move)
+            
+            
+            print("hi")
+        else:
+            self.last_move = minimax_coord 
+        
+        return (GameFile._ACTION_PLACE, int(self.last_move[0]), int(self.last_move[1]))
         
 
     def turn(self, player, action):
@@ -116,14 +144,14 @@ class Player:
                 
         # The position of this would be an error
         self.turn_counter += 1
-
-    
     
     def minimax_decision(self, neighbours, board):
         """
         
         returns the node that we are going to place the board based on minimax
         calculation taught in lectures
+        
+        or returns false if there is no conclusive move
         
         neighbours : list of neighbours of the last node that was placed on
         the grid
@@ -135,21 +163,6 @@ class Player:
         # key : coordinate
         # value : the number of neighbours
         value = {}
-        
-        # Final coordinates check:
-        for move in neighbours:
-            
-            connected_coords = board.connected_coords(self.last_move)
-            int_connected_coords = self.convert_coords_to_int(connected_coords)
-            last_coord = self.final_move(move, int_connected_coords)
-            print(f"final_coords1 == : {self.final_coords1}")
-            print(f"final_coords2 == : {self.final_coords2}")
-            
-            print(f"int_connected_coords: {int_connected_coords}")
-            print(f"last_coord: {last_coord}")
-            
-            if (last_coord):
-                return last_coord
         
         # go through any move that we can possibly do next
         # in our case we limit this to neighbours of the current node
@@ -184,9 +197,6 @@ class Player:
         print("The value is: ")
         print(value)
         
-        
-            
-        
         # maximum will be the highest utility value
         maximum = const.A_SMALL_VALUE
         for key in value:
@@ -204,6 +214,9 @@ class Player:
         
         possible_moves = self.remove_occupied(possible_moves_temp, board)
         print(f"Possible moves after removed: {possible_moves}")
+        
+        if (len(possible_moves) == 0):
+            return False
         
         # we have to come up a different method for this section of the code
         # Find the move in our list of possible moves which has the which has the least number of
