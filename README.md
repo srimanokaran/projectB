@@ -93,6 +93,9 @@ function minimax-value(neighbours_list, board, value):
         temp_board = deepcopy of board
         
         # This is the opponent playing
+
+        place our move in board
+
         place first element of neighbours_list in board
         
         count how many of our piece are there
@@ -105,7 +108,12 @@ function minimax-value(neighbours_list, board, value):
         return minimax-value(updated neighbours_list, board, value)
 
 '''
+
+
     
+nótes:
+    check if neighbouring cells are preoccupíed
+    check enemy's neighbours list
 
 
 # References

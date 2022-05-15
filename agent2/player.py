@@ -54,10 +54,11 @@ class Player:
         y = action[2]
         self.board[(x,y)] = player
         
+        """""
         for i in range(self.size):
             for j in range(self.size):
                 print(f"({i},{j}) = {self.board.__getitem__((i,j))}")
-    
+        """
     def return_blue_coords1(self):
         """
         return the bottom row of coordinates in a list of tuples
