@@ -12,7 +12,6 @@ class Player:
     """
     The coordinates in board follow the format (y,x)
     
-    For every action done by a player 
         - Two turn functions are called
             - one for agent 1
             - other for agent 2
@@ -87,13 +86,17 @@ class Player:
             if (minimax_coord == False):
                 
                 """check for a depth 2 move/capture and if so proceed with that"""
-                
-                """check for a backtrack move and proceed with that"""
-                
-                back_track_coord = self.back_track()
-                print(f"back_track_coord : {back_track_coord}")
-                if (back_track_coord):
-                    self.last_move = back_track_coord
+                capture_coord = self.check_capture()
+                print(f"capture_coord: {capture_coord}")
+                if(capture_coord):
+                    return (GameFile._ACTION_PLACE, int(capture_coord[0]), int(capture_coord[1]))
+                    # self.last_move = capture_coord
+                else:
+                    """check for a backtrack move and proceed with that"""
+                    back_track_coord = self.back_track()
+                    print(f"back_track_coord : {back_track_coord}")
+                    if (back_track_coord):
+                        self.last_move = back_track_coord
                 
             else:
                 print("placing minimax coordinate")
@@ -136,61 +139,7 @@ class Player:
                 
         # The position of this would be an error
         self.turn_counter += 1
-    
-    def final_coordinate(self, neighbours):
-        """
-        
-        final_coordinate
-        
-        """
-        
-        # Final coordinates check:
-        for move in neighbours:
             
-            connected_coords = self.board.connected_coords(self.last_move)
-            int_connected_coords = self.convert_coords_to_int(connected_coords)
-            last_coord = self.final_move(move, int_connected_coords)
-            print(f"final_coords1 == : {self.final_coords1}")
-            print(f"final_coords2 == : {self.final_coords2}")
-            
-            print(f"int_connected_coords: {int_connected_coords}")
-            print(f"last_coord: {last_coord}")
-            
-            if (last_coord):
-                return last_coord
-        
-        return False
-
-    def back_track(self):
-        """
-        
-            backtrack
-        
-        """
-        
-        # get a list of path that you can back track in
-        connected_coords = self.board.connected_coords(self.last_move)
-        # removed_coords = self.remove_occupied(connected_coords, self.board)
-        int_coords = self.convert_coords_to_int(connected_coords)
-        print(f"self.last_move value is {self.last_move} and the type is {self.board[(0,0)]}")
-        print(f"the value of (1,0) is {self.board[(1,0)]}")
-        print(f"self.last_move is {self.last_move}")
-        print(f"connected_coords is {connected_coords}")
-        print(f"int coords is {int_coords}")
-        for coord in int_coords:
-            
-            neighbours = self.board._coord_neighbours(coord)
-            removed_neighbours = self.remove_occupied(neighbours, self.board)
-            int_neighbours = self.convert_coords_to_int(removed_neighbours)
-            
-            minimax_coord = self.minimax_decision(int_neighbours, self.board)
-            
-            if (minimax_coord):
-                return minimax_coord
-        
-        return False
-            
-    
     def minimax_decision(self, neighbours, board):
         """
         
@@ -535,3 +484,82 @@ class Player:
                     num_of_pieces  += 1
         
         return num_of_pieces
+
+    def check_capture(self):
+        
+        neighbours = self.board._coord_neighbours(self.last_move)
+        
+        print("capture mechanism")
+        
+        # for a move, check all it's neighborus.
+        neighbours_neighbour_option = []
+        for move in neighbours:
+            for move1 in self.board._coord_neighbours(move):
+                if move1 not in self.get_occupied(self.board):
+                    neighbours_neighbour_option.append(move1)
+        
+        # remove duplicates
+        neighbours_neighbour_option = list(dict.fromkeys(neighbours_neighbour_option))
+        # print(neighbours_neighbour_option)
+        int_neighbours = self.convert_coords_to_int(neighbours_neighbour_option)
+        minimax_coord = self.minimax_decision(int_neighbours, self.board)
+        
+        if(minimax_coord):
+            return minimax_coord
+        
+        
+        return False
+
+    def final_coordinate(self, neighbours):
+        """
+        
+        final_coordinate
+        
+        """
+        
+        # Final coordinates check:
+        for move in neighbours:
+            
+            connected_coords = self.board.connected_coords(self.last_move)
+            int_connected_coords = self.convert_coords_to_int(connected_coords)
+            last_coord = self.final_move(move, int_connected_coords)
+            print(f"final_coords1 == : {self.final_coords1}")
+            print(f"final_coords2 == : {self.final_coords2}")
+            
+            print(f"int_connected_coords: {int_connected_coords}")
+            print(f"last_coord: {last_coord}")
+            
+            if (last_coord):
+                return last_coord
+        
+        return False
+
+    def back_track(self):
+        """
+        
+            backtrack
+        
+        """
+        
+        # get a list of path that you can back track in
+        connected_coords = self.board.connected_coords(self.last_move)
+        # removed_coords = self.remove_occupied(connected_coords, self.board)
+        int_coords = self.convert_coords_to_int(connected_coords)
+        print("backtrack")
+        print(f"self.last_move value is {self.last_move} and the type is {self.board[(0,0)]}")
+        print(f"the value of (1,0) is {self.board[(1,0)]}")
+        print(f"self.last_move is {self.last_move}")
+        print(f"connected_coords is {connected_coords}")
+        print(f"int coords is {int_coords}")
+        for coord in int_coords:
+            
+            neighbours = self.board._coord_neighbours(coord)
+            removed_neighbours = self.remove_occupied(neighbours, self.board)
+            int_neighbours = self.convert_coords_to_int(removed_neighbours)
+            
+            minimax_coord = self.minimax_decision(int_neighbours, self.board)
+            
+            if (minimax_coord):
+                return minimax_coord
+        
+        return False
