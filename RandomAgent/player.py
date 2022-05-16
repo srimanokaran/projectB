@@ -1,5 +1,5 @@
 from random import randint
-from RandomAgent.board import Board
+from referee.board import Board
 import referee.game as GameFile
 
 class Player:
