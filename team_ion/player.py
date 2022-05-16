@@ -187,7 +187,6 @@ class Player:
         if (len(possible_moves) == 0):
             return False
         
-        # we have to come up a different method for this section of the code
         # Find the move in our list of possible moves which has the which has the most number of
         # neighbouring free nodes, this will be our final move   
         maximum = const.A_SMALL_VALUE
@@ -211,14 +210,10 @@ class Player:
         
         """
         returns the utility value for our current move
-            - utility value : the number of our piece that we have on the board left 
             - since the opponenet would want us to have the least number of pieces in the board,
             this function goes through all possible opponent moves and choose the move that would 
             be least beneficial for us
-            - then return the number of nodes that would be left in the board if that move is made
-            by the opponent
-
-              
+            - then returns the utility value         
         
         utility value : (the number of pieces our colour has on the grid) - (number of opponent pieces on  the grid)
         
