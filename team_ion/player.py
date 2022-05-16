@@ -188,8 +188,8 @@ class Player:
             return False
         
         # we have to come up a different method for this section of the code
-        # Find the move in our list of possible moves which has the which has the least number of
-        # neighbouring occupied nodes, this will be our final move   
+        # Find the move in our list of possible moves which has the which has the most number of
+        # neighbouring free nodes, this will be our final move   
         maximum = const.A_SMALL_VALUE
         for move in possible_moves:
             
